@@ -1,20 +1,32 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const app = express();
 app.use(bodyParser.json());
-app.use(cors())
+app.use(cors());
 
-app.get('/posts', (req, res) => {
-  res.send('GET request to the homepage')
-})
+const posts = {};
 
-app.post('/events', function (req, res) {
-  res.send('POST request to the homepage')
-})
+app.get("/posts", (req, res) => {
+  res.send(posts);
+});
 
+app.post("/events", function (req, res) {
+  const { type, data } = req.body;
+  if (type === "PostCreated") {
+    const { id, title } = data;
 
-app.listen(4002, ()=>{
-    console.log("Server is running on port 4000");
-})
+    posts[id] = { id, title, comments: [] };
+  }
+  if (type === "CommentCreated") {
+    const { id, content, postId } = data;
+    const post = posts[postId];
+    post.comments.push({ id, content });
+  }
+  res.send({});
+});
+
+app.listen(4002, () => {
+  console.log("Server is running on port 4002");
+});
